@@ -107,6 +107,29 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
+      },
+      "ProductionTracker.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "ProductionTracker.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/ProductionTracker.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ProductionTracker.Application.dll": {}
+        }
+      },
+      "ProductionTracker.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/ProductionTracker.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/ProductionTracker.Domain.dll": {}
+        }
       }
     }
   },
@@ -473,11 +496,22 @@
         "swashbuckle.aspnetcore.swaggerui.6.6.2.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggerui.nuspec"
       ]
+    },
+    "ProductionTracker.Application/1.0.0": {
+      "type": "project",
+      "path": "../ProductionTracker.Application/ProductionTracker.Application.csproj",
+      "msbuildProject": "../ProductionTracker.Application/ProductionTracker.Application.csproj"
+    },
+    "ProductionTracker.Domain/1.0.0": {
+      "type": "project",
+      "path": "../ProductionTracker.Domain/ProductionTracker.Domain.csproj",
+      "msbuildProject": "../ProductionTracker.Domain/ProductionTracker.Domain.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
       "Microsoft.AspNetCore.OpenApi >= 8.0.23",
+      "ProductionTracker.Application >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.6.2"
     ]
   },
@@ -512,7 +546,11 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "H:\\Programming\\Repos\\ProductionTracker\\ProductionTracker.Application\\ProductionTracker.Application.csproj": {
+              "projectPath": "H:\\Programming\\Repos\\ProductionTracker\\ProductionTracker.Application\\ProductionTracker.Application.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
