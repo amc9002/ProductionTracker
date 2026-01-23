@@ -1,4 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+
 using ProductionTracker.Application;
+using ProductionTracker.Infrastructure;
+
+using System;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +15,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
+
 
 var app = builder.Build();
 
