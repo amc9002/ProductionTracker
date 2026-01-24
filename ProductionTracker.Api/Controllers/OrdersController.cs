@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 using ProductionTracker.Application;
-
+using ProductionTracker.Infrastructure;
 namespace ProductionTracker.Api.Controllers;
 
 [ApiController]
@@ -9,10 +9,12 @@ namespace ProductionTracker.Api.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly OrderService _orderService;
+    private readonly AppDbContext _db;
 
-    public OrdersController(OrderService orderService)
+    public OrdersController(OrderService orderService, AppDbContext db)
     {
         _orderService = orderService;
+        _db = db;
     }
 
     [HttpPost("")]
@@ -22,6 +24,9 @@ public class OrdersController : ControllerBase
         var quantity = 1;
 
         var order = _orderService.CreateOrder(productId, quantity);
+
+        _db.Orders.Add(order);
+        _db.SaveChanges();
 
         return Ok(order);
     }
