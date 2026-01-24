@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+
+using ProductionTracker.Domain;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace ProductionTracker.Infrastructure;
 
@@ -14,5 +16,7 @@ public class AppDbContext : DbContext
         : base(options)
     {
     }
+
+    public DbSet<Order> Orders => Set<Order>();
 }
 
