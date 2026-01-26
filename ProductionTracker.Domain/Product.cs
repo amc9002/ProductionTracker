@@ -1,40 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace ProductionTracker.Domain;
 
 public class Product
 {
-    public Guid Id { get; private set; }
-    public string Name { get; private set; }
-    public int Quantity { get; private set; }
-    public Product(string name, int quantity)
+    public Guid Id { get; }
+    public string Name { get; }
+    public string? Article { get; }
+    public string? Characteristics { get; }
+    public decimal? BasePrice { get; }
+
+    public Product(
+        Guid id,
+        string name,
+        string? article,
+        string? characteristics,
+        decimal? basePrice)
     {
-        Id = Guid.NewGuid();
+
+        if (id == Guid.Empty)
+            throw new ArgumentException("Product id must be set.", nameof(id));
+
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentNullException(nameof(name));
+            throw new ArgumentException("Product name is required.", nameof(name));
+
+        Id = id;
         Name = name;
-
-        ArgumentOutOfRangeException.ThrowIfNegative(quantity);
-        Quantity = quantity;
-    }
-
-    public void IncreaseQuantity(int amount)
-    {
-        if (amount > 0) Quantity += amount;
-        else
-            throw new ArgumentOutOfRangeException(nameof(amount));
-
-        
-    }
-    public void DecreaseQuantity(int amount)
-    {
-        if (amount > 0 && amount <= Quantity) Quantity -= amount;
-        else
-            throw new ArgumentOutOfRangeException(nameof(amount));
+        Article = article;
+        Characteristics = characteristics;
+        BasePrice = basePrice;
     }
 }
+
 

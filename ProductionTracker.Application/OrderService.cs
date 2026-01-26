@@ -10,7 +10,7 @@ namespace ProductionTracker.Application;
 
 public class OrderService
 {
-    public Order CreateOrder(Guid productId, int quantity)
+    public static Order CreateOrder(Guid productId, int quantity)
     {
         var order = new Order(productId, quantity);
         return order;

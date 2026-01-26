@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Steel pipe Ø20",
+    "article": "ST-PIPE-20",
+    "characteristics": "Length 6m",
+    "basePrice": 12.5
+  },
+  {
+    "name": "Aluminum sheet 2mm",
+    "article": "AL-SHEET-2",
+    "characteristics": "1000x2000",
+    "basePrice": 35.0
+  }
+]

@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 using ProductionTracker.Application;
+using ProductionTracker.Domain;
 using ProductionTracker.Infrastructure;
+
 namespace ProductionTracker.Api.Controllers;
 
 [ApiController]
@@ -23,7 +26,7 @@ public class OrdersController : ControllerBase
         var productId = Guid.NewGuid();
         var quantity = 1;
 
-        var order = _orderService.CreateOrder(productId, quantity);
+        var order = OrderService.CreateOrder(productId, quantity);
 
         _db.Orders.Add(order);
         _db.SaveChanges();
