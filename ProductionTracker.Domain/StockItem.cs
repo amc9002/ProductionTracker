@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace ProductionTracker.Domain
 {
-    class StockItem
+    public class StockItem
     {
         private readonly Guid _productId;
         private int _quantity;
+
+        public Guid ProductId => _productId;
+        public int Quantity => _quantity;
 
         public StockItem(Guid id, int quantity)
         {
@@ -32,8 +35,5 @@ namespace ProductionTracker.Domain
                 throw new InvalidOperationException("Amount is not enough");
             _quantity -= amount;
         }
-
-        public Guid ProductId => _productId;
-        public int Quantity => _quantity;
     }
 }
