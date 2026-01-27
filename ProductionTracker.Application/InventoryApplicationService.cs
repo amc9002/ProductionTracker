@@ -2,6 +2,9 @@ using ProductionTracker.Domain;
 
 namespace ProductionTracker.Application
 {
+    /// <summary>
+    /// Executes operational orders against inventory.
+    /// </summary>
     public class InventoryApplicationService(
         Inventory inventory,
         InMemoryCatalog catalog)
@@ -10,63 +13,88 @@ namespace ProductionTracker.Application
         private readonly InMemoryCatalog _catalog = catalog;
 
         /// <summary>
+        /// Executes the given operational order.
+        /// Sets order status according to execution result.
+        /// </summary>
+        public void Execute(Order order)
+        {
+            try
+            {
+                switch (order.Action)
+                {
+                    case OrderAction.Register:
+                        RegisterProduct(order.ProductId);
+                        break;
+
+                    case OrderAction.Receive:
+                        ReceiveProduct(order.ProductId, order.Quantity);
+                        break;
+
+                    case OrderAction.Issue:
+                        IssueProduct(order.ProductId, order.Quantity);
+                        break;
+
+                    default:
+                        throw new InvalidOperationException("Unknown order action");
+                }
+
+                order.MarkCompleted();
+            }
+            catch
+            {
+                order.MarkRejected();
+            }
+        }
+
+        /// <summary>
         /// Registers a product in inventory (creates stock card with zero quantity).
         /// </summary>
-        public Result RegisterProduct(Guid productId)
+        private void RegisterProduct(Guid productId)
         {
             if (!_catalog.Exists(productId))
-                return Result.Invalid("Product does not exist in catalog");
+                throw new InvalidOperationException("Product does not exist in catalog");
 
             if (_inventory.HasStockItem(productId))
-                return Result.Invalid("Stock item already exists");
+                throw new InvalidOperationException("Stock item already exists");
 
             _inventory.CreateStockItem(productId);
-            return Result.Success();
         }
 
         /// <summary>
         /// Receives product into inventory.
         /// Automatically registers stock item if it does not exist.
         /// </summary>
-        public Result ReceiveProduct(Guid productId, int amount)
+        private void ReceiveProduct(Guid productId, int amount)
         {
             if (amount <= 0)
-                return Result.Invalid("Amount must be greater than zero");
+                throw new InvalidOperationException("Amount must be greater than zero");
 
             if (!_catalog.Exists(productId))
-                return Result.NotFound("Product does not exist in catalog");
+                throw new InvalidOperationException("Product does not exist in catalog");
 
             if (!_inventory.HasStockItem(productId))
             {
-                var registerResult = RegisterProduct(productId);
-                if (registerResult.Status != ResultStatus.Success)
-                    return registerResult;
+                RegisterProduct(productId);
             }
 
             _inventory.ReceiveStock(productId, amount);
-            return Result.Success();
         }
 
         /// <summary>
         /// Issues product from inventory.
         /// </summary>
-        public Result IssueProduct(Guid productId, int amount)
+        private void IssueProduct(Guid productId, int amount)
         {
             if (amount <= 0)
-                return Result.Invalid("Amount must be greater than zero");
+                throw new InvalidOperationException("Amount must be greater than zero");
 
             if (!_inventory.TryGetAvailableQuantity(productId, out var available))
-                return Result.NotFound("Stock item does not exist");
+                throw new InvalidOperationException("Stock item does not exist");
 
             if (available < amount)
-                return Result.Conflict(
-                    "Insufficient stock",
-                    new { Available = available }
-                );
+                throw new InvalidOperationException("Insufficient stock");
 
             _inventory.IssueStock(productId, amount);
-            return Result.Success();
         }
-
     }
 }
