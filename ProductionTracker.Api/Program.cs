@@ -15,9 +15,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Basic Swagger setup
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Production Tracker API", Version = "v1" });
 
-builder.Services.AddScoped<OrderService>();
+    // Include XML comments
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
+});
+
+var catalog = new InMemoryCatalog();
+builder.Services.AddSingleton(catalog);
+builder.Services.AddSingleton<Inventory>();
+
+builder.Services.AddScoped<OrderApplicationService>();
+builder.Services.AddScoped<CatalogApplicationService>();
+builder.Services.AddScoped<InventoryApplicationService>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -32,7 +48,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-var catalog = new InMemoryCatalog();
 builder.Services.AddSingleton(catalog);
 
 var app = builder.Build();

@@ -66,5 +66,12 @@ namespace ProductionTracker.Domain
         {
             return Positions.FirstOrDefault(pos => pos.Id == id);
         }
+
+        public IEnumerable<Position> FindByName(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return [];
+
+            return Positions.Where(p => p.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

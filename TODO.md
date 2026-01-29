@@ -1,168 +1,152 @@
 ﻿# ProductionTracker — TODO / Roadmap
 
 This file tracks the current state of the project and the next concrete steps.
-It is intentionally explicit to avoid losing context between iterations.
+It is intentionally explicit to preserve architectural intent between iterations.
 
 ---
 
 ## Current State (Baseline)
 
-Status: **Working prototype**
+Status: **Working backend prototype**
 
 Implemented:
+
 - Application starts successfully
 - Swagger UI available
 - Demo product catalog loaded at startup (in-memory)
 - Read-only catalog endpoint:
   - GET /api/catalog
+- Explicit order-based inventory workflow
 - Clear separation of layers:
-  - Api
+  - API
   - Application
   - Domain
-- Demo seed logic explicitly separated from domain logic
+- Inventory logic executed through a single entry point
+- Demo / seed logic explicitly separated from domain logic
 - Git repository cleaned from build artifacts (bin/obj)
 - Documentation added for public classes and methods
 
-Not implemented yet (by design):
-- Persistent storage for inventory
-- Full order workflow
+Intentionally not implemented:
+
 - Authentication / authorization
 - Frontend
+- Cloud infrastructure
+- Background processing
 
 ---
 
 ## Design Principles (Do Not Break)
 
-These rules define the project direction:
+These rules define the architectural boundaries of the project:
 
 - Domain logic must not depend on infrastructure
+- Inventory state changes are driven by explicit orders
+- Application layer coordinates workflows, not state
+- API controllers are thin (HTTP translation only)
 - Demo / seed logic must be clearly marked as non-production
-- API controllers are thin (translation only)
-- Business rules live in Application / Domain
 - Prefer explicit commands over generic CRUD
 - In-memory implementations are acceptable for demo purposes
 
 ---
 
-## Phase 1 — Inventory Commands (Highest Priority)
+## Phase 1 — Inventory Execution (Completed)
 
-	Goal: demonstrate command-style backend logic without persistence.
+Goal: demonstrate explicit command-style backend logic without persistence.
 
-### 1. Inventory Receive (ADD stock)
+Implemented:
 
-Target:
+- Inventory execution via explicit orders
+- Supported actions:
+  - Register product
+  - Receive product
+  - Issue product
+- Inventory exposed through a single execution method
+- Clear error handling for:
+  - unknown product
+  - insufficient stock
+  - invalid quantities
+- In-memory inventory implementation
 
-	- POST /api/inventory/receive
+Notes:
 
-	Request example:
-	```json
-	{
-	  "productId": "guid",
-	  "quantity": 10
-	}
+- Inventory does not expose individual operation methods publicly
+- All state changes are driven by order semantics
 
-Rules:
+---
 
-	productId must exist in catalog
-	quantity must be > 0
-	inventory stored in-memory
-	no database usage
+## Phase 2 — Orders (Completed)
 
-Tasks:
+Goal: model intent-based operations instead of CRUD-style updates.
 
-	 Define InventoryReceiveRequest DTO
-	 Add InventoryApplicationService.Receive(...)
-	 Validate input in application layer
-	 Add InventoryController
-	 Return meaningful HTTP responses (400 / 404 / 200)
+Implemented:
 
-### 2. Inventory Issue (REMOVE stock)
+- Order represents an operational intent, not a data record
+- Order contains:
+  - action
+  - target product
+  - parameters
+  - execution status
+- OrderApplicationService:
+  - creates orders
+  - delegates execution to inventory
+- InventoryApplicationService:
+  - executes orders
+  - controls order status transitions
 
-	Target:
+Notes:
 
-	POST /api/inventory/issue
+- Order persistence is intentionally omitted at this stage
+- Order lifecycle is synchronous and explicit
 
-	Request example:
+---
 
-	{
-	  "productId": "guid",
-	  "quantity": 5
-	}
+## Phase 3 — Persistence (Next Step)
 
-
-Rules:
-
-	cannot issue more than available
-	clear error if insufficient quantity
-	no silent failures
-
-Tasks:
-
-	 Define InventoryIssueRequest DTO
-	 Add InventoryApplicationService.Issue(...)
-	 Handle insufficient stock explicitly
-	 Map domain errors to HTTP responses
-
-### 3. Diagnostic Inventory View (Development Only)
-
-Target:
-
-	GET /api/debug/inventory
-
-Rules:
-
-	development / diagnostic purpose only
-	returns current in-memory inventory state
-	not part of public API contract
-
-Tasks:
-
-	 Expose read-only inventory snapshot
-	 Clearly mark endpoint as debug-only
-	 Document in README
-
-## Phase 2 — Orders (Post-Inventory)
-
-	Goal: show how commands orchestrate domain logic.
+Goal: demonstrate infrastructure separation without changing domain logic.
 
 Planned direction:
 
-	Order represents an intent (not CRUD entity)
-	Order processing may affect inventory
-	Persistence optional at this stage
+- Introduce persistence as an infrastructure concern
+- Keep domain model unchanged
+- Use PostgreSQL for inventory and order storage
 
-Tasks (not started):
+Planned tasks:
 
-	 Clarify order lifecycle
-	 Decide: synchronous vs async processing
-	 Define OrderApplicationService
-	 Integrate with inventory logic
+- Introduce repository abstractions
+- Implement PostgreSQL-backed inventory repository
+- Persist orders for inspection and debugging
+- Keep in-memory implementation for tests and demo mode
 
-## Phase 3 — Persistence (Optional / Later)
-	Goal: show infrastructure separation, not production readiness.
+---
 
-Ideas:
+## Phase 4 — API Completion (After Persistence)
 
-	Replace in-memory inventory with database-backed implementation
-	Keep domain unchanged
-	Use PostgreSQL (already prepared)
+Goal: expose a complete, review-ready backend API.
 
-Tasks:
+Planned tasks:
 
-	Introduce repository abstractions
-	Implement PostgreSQL inventory repository
-	Keep in-memory implementation for tests/demo
+- Add Orders API endpoint:
+  - POST /api/orders
+- Map order execution results to HTTP responses
+- Keep API thin and declarative
+- Ensure Swagger reflects actual execution flow
 
-## Phase 4 — Hardening & Polish (Optional)
+---
 
-	 Improve README clarity
-	 Add minimal unit tests (Application layer)
-	 Improve error handling consistency
-	 Optional Docker Compose for full stack startup
+## Phase 5 — Hardening & Polish (Optional)
 
-Notes to Future Self
+Optional improvements:
 
-	Do not rush infrastructure
-	A working, well-explained core is more valuable than feature count
-	Each phase should end with a clean commit
-	If stuck, re-read this file before adding new concepts
+- Improve README clarity and flow diagrams
+- Add minimal unit tests (Application layer)
+- Improve error handling consistency
+- Optional Docker Compose for local PostgreSQL startup
+
+---
+
+## Notes to Future Self
+
+- Do not rush infrastructure
+- A small, well-explained core is more valuable than feature count
+- Each phase should end with a clean, reviewable commit
+- If architecture starts drifting, stop and re-read this file
